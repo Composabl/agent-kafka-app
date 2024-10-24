@@ -1,2 +1,5 @@
 # add your composabl license here and save the file as .env
-COMPOSABL_LICENSE=your_license_here
+COMPOSABL_LICENSE=your_license_key_here
+KAFKA_BROKER_URL=kafka:9092
+OBSERVATION_TOPIC=observations
+ACTION_TOPIC=actions
