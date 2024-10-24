@@ -1,0 +1,74 @@
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper  # Persistent storage for Zookeeper
+    networks:
+      - kafka_net
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092  # Bind to all interfaces
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092  # Use service name 'kafka'
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]  # Check if Kafka is available on port 9092
+      interval: 10s  # Check every 10 seconds
+      timeout: 5s
+      retries: 10
+    networks:
+      - kafka_net
+    volumes:
+      - kafka_data:/var/lib/kafka  # Persistent storage for Kafka
+
+  flask_app:
+    build: .
+    container_name: flask_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/usr/src/app  # Mount the application code for live updates
+    env_file:
+      - .env
+    environment:
+      - COMPOSABL_LICENSE=${COMPOSABL_LICENSE}
+      - KAFKA_BROKER_URL=kafka:9092
+      - OBSERVATION_TOPIC=agent_input
+      - ACTION_TOPIC=agent_output
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - kafka_net
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKER_CONNECT: "kafka:9092"
+    depends_on:
+      - kafka
+    networks:
+      - kafka_net
+
+
+networks:
+  kafka_net:
+    driver: bridge
+
+volumes:
+  kafka_data:
+    driver: local  # Volume to store Kafka data
+  zookeeper_data:
+    driver: local  # Volume to store Zookeeper data
