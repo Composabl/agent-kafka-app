@@ -59,26 +59,6 @@ OBSERVATION_TOPIC=observations
 ACTION_TOPIC=actions
 ```
 
-## Accessing the App
-### Flask API Endpoint
-- **/predict**: This endpoint accepts observation data and sends it to Kafka.
-  - Example usage with `curl`:
-  ```sh
-  curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{
-    "observation": {
-      "T": 311.0,
-      "Tc": 292.0,
-      "Ca": 8.56,
-      "Cref": 8.56,
-      "Tref": 311.0,
-      "Conc_Error": 0.0,
-      "Eps_Yield": 0.0,
-      "Cb_Prod": 0.0
-    }
-  }'
-  ```
-- **Kafka Consumer**: The consumer thread runs automatically in the Flask app and processes messages from the `observations` topic to generate actions.
-
 ### Using Kafdrop to Monitor Kafka
 Kafdrop is accessible at [http://localhost:9000](http://localhost:9000). Use it to:
 - View topics (`observations`, `actions`).
@@ -95,19 +75,6 @@ The `kafka_random_producer.py` script can be run manually to generate random obs
    python kafka_random_producer.py
    ```
    This will send random observations to the `observations` topic in Kafka.
-
-## Development Setup (Without Docker)
-If you prefer to run the app locally without Docker:
-1. **Install the required dependencies**:
-   ```sh
-   pip install -r requirements.txt
-   ```
-2. **Start Zookeeper and Kafka** locally (you may need to install Kafka and Zookeeper manually).
-3. **Run the Flask app**:
-   ```sh
-   python agent_inference.py
-   ```
-   The app will run on [http://localhost:8000](http://localhost:8000).
 
 ## Notes
 - **Kafka and Zookeeper** must be running for the app to work correctly.

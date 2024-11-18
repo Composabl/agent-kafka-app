@@ -33,4 +33,4 @@ if __name__ == "__main__":
         observation = generate_random_observation()
         producer.send(OBSERVATION_TOPIC, value=observation)
         print(f"Sent observation to Kafka topic '{OBSERVATION_TOPIC}': {observation}")
-        time.sleep(5)  # Send every 5 seconds
+        time.sleep(2)  # Send every 2 seconds
